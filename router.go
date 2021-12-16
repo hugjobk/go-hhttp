@@ -159,18 +159,18 @@ type nodeWrapper struct {
 	nextChild int
 }
 
-func findPath(path []nodeWrapper, candidates []*node, segments []string) []nodeWrapper {
-	for _, candidate := range candidates {
-		if candidate.isFixed && candidate.segment != segments[0] {
+func findPath(path []nodeWrapper, roots []*node, segments []string) []nodeWrapper {
+	for _, root := range roots {
+		if root.isFixed && root.segment != segments[0] {
 			continue
 		}
-		path = append(path, nodeWrapper{candidate, 0})
+		path = append(path, nodeWrapper{root, 0})
 	loop:
 		for len(path) > 0 {
 			if len(path) == len(segments) {
 				return path
 			}
-			top := path[len(path)-1]
+			top := &path[len(path)-1]
 			for top.nextChild < len(top.children) {
 				child := top.children[top.nextChild]
 				top.nextChild++
@@ -181,7 +181,6 @@ func findPath(path []nodeWrapper, candidates []*node, segments []string) []nodeW
 			}
 			path = path[:len(path)-1]
 		}
-		path = path[:0]
 	}
 	return nil
 }
@@ -207,6 +206,5 @@ func splitPath(path string, segments []string) []string {
 			start = i + 1
 		}
 	}
-	segments = append(segments, path[start:end+1])
-	return segments
+	return append(segments, path[start:end+1])
 }
