@@ -79,7 +79,15 @@ func (w fakeResponseWriter) Write([]byte) (int, error) {
 
 func (w fakeResponseWriter) WriteHeader(int) {}
 
-func BenchmarkServeHTTP(b *testing.B) {
+func TestRouter_Print(t *testing.T) {
+	r := hhttp.NewRouter()
+	for _, route := range routes {
+		r.AddRoute(route.Method, route.Path, route.Handler)
+	}
+	r.Print()
+}
+
+func BenchmarkRouter_ServeHTTP(b *testing.B) {
 	r := hhttp.NewRouter()
 	for _, route := range routes {
 		r.AddRoute(route.Method, route.Path, route.Handler)

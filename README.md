@@ -86,7 +86,7 @@ func (w fakeResponseWriter) Write([]byte) (int, error) {
 
 func (w fakeResponseWriter) WriteHeader(int) {}
 
-func BenchmarkServeHTTP(b *testing.B) {
+func BenchmarkRouter_ServeHTTP(b *testing.B) {
 	r := hhttp.NewRouter()
 	for _, route := range routes {
 		r.AddRoute(route.Method, route.Path, route.Handler)
@@ -112,7 +112,7 @@ Output:
 goos: windows
 goarch: amd64
 pkg: hhttp
-BenchmarkServeHTTP-4    11383048               105 ns/op               0 B/op          0 allocs/op
+BenchmarkRouter_ServeHTTP-4     11342582               106 ns/op               0 B/op          0 allocs/op
 PASS
-ok      hhttp   2.387s
+ok      hhttp   2.647s
 ```

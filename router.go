@@ -1,8 +1,12 @@
 package hhttp
 
 import (
+	"fmt"
 	"net/http"
+	"reflect"
 	"regexp"
+	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -35,6 +39,25 @@ type Router struct {
 
 func NewRouter() *Router {
 	return &Router{NotFoundHandler: defaultNotFoundHandler, routeTable: make(map[string][]*node)}
+}
+
+func (router *Router) Print() {
+	var rs routes
+	for method, roots := range router.routeTable {
+		for _, root := range roots {
+			var segment string
+			if root.isFixed {
+				segment = root.segment
+			} else {
+				segment = "{" + root.segment + "}"
+			}
+			bfs(root, method, "/"+segment, &rs)
+		}
+	}
+	sort.Sort(rs)
+	for _, r := range rs {
+		fmt.Println(r)
+	}
 }
 
 func (router *Router) Use(middlewares ...Handler) {
@@ -207,4 +230,67 @@ func splitPath(path string, segments []string) []string {
 		}
 	}
 	return append(segments, path[start:end+1])
+}
+
+type route struct {
+	method   string
+	path     string
+	handlers []Handler
+}
+
+func (r route) String() string {
+	handlerNames := make([]string, len(r.handlers))
+	for i := range r.handlers {
+		handlerNames[i] = runtime.FuncForPC(reflect.ValueOf(r.handlers[i]).Pointer()).Name()
+	}
+	return fmt.Sprintf("%-6s %s -> %s", r.method, r.path, strings.Join(handlerNames, " + "))
+}
+
+var methodOrder = map[string]int{
+	http.MethodGet:     1,
+	http.MethodHead:    2,
+	http.MethodPost:    3,
+	http.MethodPut:     4,
+	http.MethodPatch:   5,
+	http.MethodDelete:  6,
+	http.MethodConnect: 7,
+	http.MethodOptions: 8,
+	http.MethodTrace:   9,
+}
+
+type routes []route
+
+func (rs *routes) Append(r route) {
+	*rs = append(*rs, r)
+}
+
+func (rs routes) Len() int {
+	return len(rs)
+}
+
+func (rs routes) Less(i, j int) bool {
+	r1 := rs[i]
+	r2 := rs[j]
+	return r1.path < r2.path || (r1.path == r2.path && methodOrder[r1.method] < methodOrder[r2.method])
+}
+
+func (rs routes) Swap(i, j int) {
+	temp := rs[i]
+	rs[i] = rs[j]
+	rs[j] = temp
+}
+
+func bfs(n *node, method string, path string, rs *routes) {
+	if len(n.handlers) > 0 {
+		rs.Append(route{method, path, n.handlers})
+	}
+	for _, child := range n.children {
+		var segment string
+		if child.isFixed {
+			segment = child.segment
+		} else {
+			segment = "{" + child.segment + "}"
+		}
+		bfs(child, method, path+"/"+segment, rs)
+	}
 }
