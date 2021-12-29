@@ -86,6 +86,14 @@ func (w fakeResponseWriter) Write([]byte) (int, error) {
 
 func (w fakeResponseWriter) WriteHeader(int) {}
 
+func TestRouter_Print(t *testing.T) {
+	r := hhttp.NewRouter()
+	for _, route := range routes {
+		r.AddRoute(route.Method, route.Path, route.Handler)
+	}
+	r.Print()
+}
+
 func BenchmarkRouter_ServeHTTP(b *testing.B) {
 	r := hhttp.NewRouter()
 	for _, route := range routes {
@@ -100,6 +108,7 @@ func BenchmarkRouter_ServeHTTP(b *testing.B) {
 		}
 	})
 }
+
 ```
 
 Run test example:
@@ -109,6 +118,16 @@ Run test example:
 Output:
 
 ```
+GET    /test-dr/v1/{realmId}/{storageId}/records -> hhttp_test.notImplemented
+DELETE /test-dr/v1/{realmId}/{storageId}/records -> hhttp_test.notImplemented
+GET    /test-dr/v1/{realmId}/{storageId}/records/{recordId} -> hhttp_test.notImplemented
+PUT    /test-dr/v1/{realmId}/{storageId}/records/{recordId} -> hhttp_test.notImplemented
+DELETE /test-dr/v1/{realmId}/{storageId}/records/{recordId} -> hhttp_test.notImplemented
+GET    /test-dr/v1/{realmId}/{storageId}/records/{recordId}/blocks -> hhttp_test.notImplemented
+DELETE /test-dr/v1/{realmId}/{storageId}/records/{recordId}/blocks -> hhttp_test.notImplemented
+GET    /test-dr/v1/{realmId}/{storageId}/records/{recordId}/blocks/{blockId} -> hhttp_test.notImplemented
+PUT    /test-dr/v1/{realmId}/{storageId}/records/{recordId}/blocks/{blockId} -> hhttp_test.notImplemented
+DELETE /test-dr/v1/{realmId}/{storageId}/records/{recordId}/blocks/{blockId} -> hhttp_test.notImplemented
 goos: windows
 goarch: amd64
 pkg: hhttp
