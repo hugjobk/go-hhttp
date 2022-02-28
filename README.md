@@ -8,7 +8,7 @@ Benchmark func ServeHTTP:
 package hhttp_test
 
 import (
-	"hhttp"
+	"github.com/hugjobk/go-hhttp"
 	"net/http"
 	"testing"
 )
